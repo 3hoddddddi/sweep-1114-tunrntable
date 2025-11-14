@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>$100 Amazon Gift Card Spin</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand-orange: #FF9900;
+  --brand-dark: #232F3E;
+  --brand-red: #FF0000;
+  --text-white: #FFFFFF;
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+  font-family: 'Montserrat', system-ui, sans-serif;
+  background-color: var(--brand-dark);
+  color: var(--text-white);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  min-height:100vh;
+  padding:16px;
+}
+.container { width:100%; max-width:480px; text-align:center; }
+.header-text {
+  font-size:20px; line-height:1.3; font-weight:700;
+  margin-bottom:20px;
+}
+.header-text .line1, .header-text .line2 { display:block; }
+.prize-image {
+  width:80%; max-width:300px; height:auto; margin:0 auto 20px;
+  background-color:#fff;
+}
+#wheel-container {
+  position: relative;
+  width: 90%;
+  max-width:350px;
+  margin:0 auto 20px;
+}
+#wheel {
+  width:100%;
+  border-radius:50%;
+  overflow:hidden;
+  transform: rotate(0deg);
+  transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.slice {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top:50%;
+  left:50%;
+  transform-origin: 0% 0%;
+  background-color: var(--brand-orange);
+  border:1px solid #fff;
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-start;
+  padding:10px;
+  font-size:14px;
+  font-weight:700;
+  color:#fff;
+}
+#wheel-center {
+  position:absolute;
+  top:50%; left:50%;
+  transform: translate(-50%, -50%);
+  width:70px;
+  height:70px;
+  background-color: var(--brand-red);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:16px;
+  cursor:pointer;
+  box-shadow:0 0 15px rgba(255,0,0,0.6);
+}
+#cta {
+  position: fixed;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--brand-orange);
+  color: var(--text-white);
+  font-size:18px;
+  font-weight:700;
+  padding:16px 28px;
+  border-radius:12px;
+  display:none;
+  z-index:100;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(255,153,0,0.4);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header-text">
+    <span class="line1">Today is your lucky day!</span>
+    <span class="line2">Take a spin and win Amazon prizes!</span>
+  </div>
+  <div class="prize-image">
+  </div>
+  <div id="wheel-container">
+    <div id="wheel">
+      <div class="slice" style="transform: rotate(0deg) skewY(-45deg);"> $10 </div>
+      <div class="slice" style="transform: rotate(45deg) skewY(-45deg);"> Missed it! </div>
+      <div class="slice" style="transform: rotate(90deg) skewY(-45deg);"> $20 </div>
+      <div class="slice" style="transform: rotate(135deg) skewY(-45deg);"> Try Again </div>
+      <div class="slice" style="transform: rotate(180deg) skewY(-45deg);"> $50 </div>
+      <div class="slice" style="transform: rotate(225deg) skewY(-45deg);"> Missed it! </div>
+      <div class="slice" style="transform: rotate(270deg) skewY(-45deg);"> $100 </div>
+      <div class="slice" style="transform: rotate(315deg) skewY(-45deg);"> Try Again </div>
+    </div>
+    <div id="wheel-center"><strong>Spin Now ⭐</strong></div>
+  </div>
+</div>
+
+<div id="cta">Claim Your Prize!</div>
+
+<script>
+(function(){
+  const wheel = document.getElementById('wheel');
+  const center = document.getElementById('wheel-center');
+  const cta = document.getElementById('cta');
+
+  center.addEventListener('click', function(){
+    center.style.pointerEvents = 'none';
+
+    const spins = 5;
+    const targetSlice = 6;
+    const degreesPerSlice = 360/8;
+    const randomOffset = Math.random() * degreesPerSlice;
+    const finalDeg = spins*360 + targetSlice*degreesPerSlice + randomOffset;
+
+    wheel.style.transform = `rotate(${finalDeg}deg)`;
+
+    wheel.addEventListener('transitionend', function handler(){
+      cta.style.display = 'block';
+      wheel.removeEventListener('transitionend', handler);
+    });
+  });
+
+  cta.addEventListener('click', function(){
+    window.location.href = 'https://www.google.com';
+  });
+})();
+</script>
+</body>
+</html>
