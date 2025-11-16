@@ -10,7 +10,7 @@ const SEGMENTS = [
   {title:"Missed it!", subtitle:""}
 ];
 const COLORS = ["#FF9900","#C94C4C","#FF9900","#C94C4C","#FF9900","#C94C4C","#FF9900","#C94C4C"];
-const TARGET_INDEX = 6; // index of $100
+const TARGET_INDEX = 6; // ensure final lands on $100
 const CANVAS_LOGICAL = 500;
 
 /* elements */
@@ -20,12 +20,44 @@ const wheelWrap = document.getElementById('wheelWrap');
 const spinCard = document.getElementById('spinCard');
 const ctaBtn = document.getElementById('ctaBtn');
 const giftCard = document.getElementById('giftCard');
+const countdownEl = document.getElementById('countdown');
 
 let total = SEGMENTS.length;
 let arc = (2 * Math.PI) / total;
 let radius = CANVAS_LOGICAL / 2;
 let currentRotation = 0; // radians
 let spinning = false;
+
+/* countdown 5 minutes */
+let countdownSeconds = 300;
+let countdownTimer = null;
+function startCountdown(){
+  updateCountdown();
+  countdownTimer = setInterval(()=>{
+    countdownSeconds--;
+    if(countdownSeconds <= 0){
+      clearInterval(countdownTimer);
+      countdownEl.textContent = "00:00";
+      onCountdownEnd();
+    } else {
+      updateCountdown();
+    }
+  },1000);
+}
+function updateCountdown(){
+  const m = Math.floor(countdownSeconds / 60);
+  const s = countdownSeconds % 60;
+  countdownEl.textContent = (m<10?'0'+m:m) + ':' + (s<10?'0'+s:s);
+}
+function onCountdownEnd(){
+  // show closed message and disable spin
+  const header = document.querySelector('.header');
+  header.querySelector('.countdown-line').textContent = "This round is closed. Stay tuned for what's next.";
+  spinCard.style.pointerEvents = 'none';
+  spinCard.style.opacity = '0.6';
+  // hide CTA if visible
+  ctaBtn.style.display = 'none';
+}
 
 /* responsive fit */
 function fitCanvas(){
@@ -40,7 +72,7 @@ function fitCanvas(){
 window.addEventListener('resize', ()=>{ fitCanvas(); drawWheel(currentRotation); adjustGiftPosition(); });
 fitCanvas();
 
-/* draw wheel with horizontal perimeter text */
+/* draw wheel with radial text (text perpendicular to edge, facing outward) */
 function drawWheel(rotation, highlightIndex = -1){
   ctx.clearRect(0,0,CANVAS_LOGICAL,CANVAS_LOGICAL);
   ctx.save();
@@ -56,27 +88,31 @@ function drawWheel(rotation, highlightIndex = -1){
     ctx.closePath();
     ctx.fillStyle = COLORS[i];
     ctx.fill();
+
     // separator
     ctx.strokeStyle = "rgba(255,255,255,0.06)";
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // perimeter text horizontal
+    // radial text: place near outer edge, rotate so text is perpendicular and faces outward
     const midAng = start + arc/2;
-    const textR = radius - 40;
+    const textR = radius - 36;
     const x = Math.cos(midAng) * textR;
     const y = Math.sin(midAng) * textR;
 
     ctx.save();
     ctx.translate(x, y);
 
-    // flip bottom-half to keep text upright
+    // rotate text so it is perpendicular to radius and facing outward
+    let rot = midAng + Math.PI/2;
+    // if on bottom half, flip 180deg so text faces outward
     let deg = midAng * 180 / Math.PI;
     if(deg > 90 && deg < 270){
-      ctx.rotate(Math.PI);
+      rot += Math.PI;
     }
+    ctx.rotate(rot);
 
-    // text
+    // draw title vertically (rotated) but we will draw horizontally after rotation
     ctx.fillStyle = "#fff";
     ctx.font = "700 16px Montserrat";
     ctx.textAlign = "center";
@@ -89,9 +125,9 @@ function drawWheel(rotation, highlightIndex = -1){
     ctx.restore();
   }
 
-  // inner rings
-  ctx.beginPath(); ctx.arc(0,0,78,0,Math.PI*2); ctx.fillStyle="#ffffff"; ctx.fill();
-  ctx.beginPath(); ctx.arc(0,0,62,0,Math.PI*2); ctx.fillStyle="#fff6e6"; ctx.fill();
+  // no big white center circle; draw subtle center ring only
+  ctx.beginPath(); ctx.arc(0,0,44,0,Math.PI*2); ctx.fillStyle="rgba(255,255,255,0.06)"; ctx.fill();
+  ctx.beginPath(); ctx.arc(0,0,34,0,Math.PI*2); ctx.fillStyle="rgba(255,255,255,0.03)"; ctx.fill();
   ctx.restore();
 
   // outer subtle ring
@@ -102,23 +138,31 @@ function drawWheel(rotation, highlightIndex = -1){
 /* initial draw */
 drawWheel(currentRotation);
 
-/* position gift card (below header, under wheel) */
+/* adjust gift card position so it's partially covered by wheel (about 43% covered) */
 function adjustGiftPosition(){
   const wrap = wheelWrap.getBoundingClientRect();
   const page = document.querySelector('.page').getBoundingClientRect();
-  giftCard.style.top = (wrap.top - page.top + wrap.height*0.06) + 'px';
-  giftCard.style.left = (wrap.left - page.left + wrap.width*0.06) + 'px';
+  // place card so wheel covers around 43% of its width: push card left/up relative to wheel
+  const top = wrap.top - page.top + wrap.height * 0.06;
+  const left = wrap.left - page.left + wrap.width * 0.06;
+  giftCard.style.top = top + 'px';
+  giftCard.style.left = left + 'px';
+  // scale card a bit larger for visibility
+  giftCard.style.width = Math.min(420, wrap.width * 0.62) + 'px';
 }
-window.addEventListener('load', ()=>{ fitCanvas(); drawWheel(currentRotation); adjustGiftPosition(); });
+window.addEventListener('load', ()=>{ fitCanvas(); drawWheel(currentRotation); adjustGiftPosition(); startCountdown(); });
 setTimeout(()=>{ adjustGiftPosition(); }, 300);
 
-/* spin function: hide center immediately, animate to target, random highlight while spinning */
+/* spin logic: hide center immediately, animate rotation to target, random highlight during spin */
 spinCard.addEventListener('click', startSpin);
 spinCard.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') startSpin(); });
 
 function startSpin(){
   if(spinning) return;
+  // if countdown ended, ignore
+  if(countdownSeconds <= 0) return;
   spinning = true;
+  // hide spin card immediately
   spinCard.style.display = 'none';
 
   const spins = 6 + Math.floor(Math.random()*2);
@@ -137,7 +181,7 @@ function startSpin(){
     const ease = 1 - Math.pow(1 - t, 3);
     currentRotation = startRot + change * ease;
 
-    // random highlight index to create sparkle effect
+    // random highlight index for sparkle effect during spin
     const highlight = Math.floor(Math.random()*total);
     drawWheel(currentRotation, highlight);
 
@@ -147,19 +191,19 @@ function startSpin(){
       // finalize
       currentRotation = finalRad % (Math.PI*2);
       drawWheel(currentRotation, TARGET_INDEX);
-      // show CTA after short delay
+      // show CTA
       setTimeout(()=>{ ctaBtn.style.display = 'block'; ctaBtn.setAttribute('aria-hidden','false'); dropConfetti(18); spinning=false; }, 420);
     }
   }
   requestAnimationFrame(animate);
 }
 
-/* confetti as $ falling */
+/* confetti as falling $ */
 function dropConfetti(count){
   const container = document.createElement('div');
   container.style.position='fixed'; container.style.left='0'; container.style.top='0';
   container.style.width='100%'; container.style.height='100%'; container.style.pointerEvents='none';
-  container.style.zIndex='60';
+  container.style.zIndex='80';
   document.body.appendChild(container);
 
   for(let i=0;i<count;i++){
