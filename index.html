@@ -1,1 +1,231 @@
-<!doctype html> <html lang="en"> <head> <meta charset="utf-8" /> <meta name="viewport" content="width=device-width,initial-scale=1" /> <title>Spin & Win - Amazon Card</title> <link rel="stylesheet" href="style.css" /> </head> <body> <div class="page"> <header class="header" role="banner"> <div class="line1" id="line1">Today is your lucky day!</div> <div class="line2" id="line2">SPIN &amp; WIN</div> <div class="line3" id="line3">$100 Amazon Card</div> <div class="countdown-line" id="countdownLine">Event ends in <span id="countdown">05:00</span></div> </header> <main class="visual" role="main"> <img src="amazon-card.png" alt="Amazon Card" class="gift-card" id="giftCard"> <div class="wheel-wrap" id="wheelWrap"> <canvas id="wheel" width="500" height="500" aria-hidden="true"></canvas> <!-- arrow rotates (from center outward toward top) --> <div class="center-arrow" id="centerArrow" aria-hidden="true"></div> <div class="spin-card" id="spinCard" role="button" aria-label="Spin Now" tabindex="0"> <span id="spinLabel">⭐ SPIN NOW ⭐</span> </div> </div> <div class="spacer"></div> <button class="cta" id="ctaBtn" aria-hidden="true">Claim Your Reward</button> </main> </div> <script src="script.js"></script> </body> </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon Card Spin & Win</title>
+<style>
+  /* Global styles */
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Header section */
+  .header {
+    text-align: center;
+    padding: 2vh 2vw;
+  }
+  .header h1 {
+    font-size: clamp(24px, 5vw, 48px);
+    margin: 0;
+  }
+  .header h2 {
+    font-size: clamp(32px, 6vw, 60px);
+    color: #FF9900;
+    margin: 0.5em 0;
+  }
+  .header h3 {
+    font-size: clamp(24px, 5vw, 48px);
+    margin: 0.5em 0;
+    animation: pulse 1s infinite;
+  }
+  .countdown {
+    color: #ff4d4d;
+    font-size: clamp(18px, 4vw, 36px);
+    margin-top: 0.5em;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Wheel container */
+  .wheel-container {
+    position: relative;
+    margin: 2vh 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  canvas#wheel {
+    width: min(82vw, 680px);
+    height: min(82vw, 680px);
+  }
+
+  .arrow {
+    position: absolute;
+    width: 40px;
+    height: 80px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    background: red;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    z-index: 10;
+  }
+
+  /* Spin button */
+  #spinBtn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: none;
+    border: 2px solid #FF9900;
+    color: #FF9900;
+    font-size: clamp(18px, 4vw, 32px);
+    padding: 0.5em 1em;
+    cursor: pointer;
+    border-radius: 12px;
+    animation: pulse 1s infinite;
+    z-index: 20;
+  }
+
+  /* Claim button */
+  #claimBtn {
+    display: none;
+    margin-top: 2vh;
+    background: linear-gradient(90deg, #FF9900, #FF6600);
+    color: white;
+    border: none;
+    padding: 1em 2em;
+    border-radius: 12px;
+    font-size: clamp(18px, 4vw, 32px);
+    cursor: pointer;
+  }
+
+  /* Confetti canvas */
+  canvas#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Today is your lucky day!</h1>
+  <h2>SPIN & WIN</h2>
+  <h3>$100 Amazon Card</h3>
+  <div class="countdown" id="countdown">Event ends in 05:00</div>
+</div>
+
+<div class="wheel-container">
+  <canvas id="wheel" width="680" height="680"></canvas>
+  <div class="arrow"></div>
+  <button id="spinBtn">⭐ SPIN NOW ⭐</button>
+</div>
+
+<button id="claimBtn" onclick="window.location.href='https://your-affiliate-link.com'">Claim Your Reward</button>
+
+<canvas id="confetti-canvas"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script>
+/* Countdown timer */
+let countdownEl = document.getElementById('countdown');
+let timeLeft = 5 * 60;
+let countdownInterval = setInterval(() => {
+  let minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+  let seconds = String(timeLeft % 60).padStart(2, '0');
+  countdownEl.textContent = `Event ends in ${minutes}:${seconds}`;
+  timeLeft--;
+  if(timeLeft < 0){
+    clearInterval(countdownInterval);
+    countdownEl.textContent = "This round is closed. Stay tuned for what's next.";
+    document.getElementById('spinBtn').disabled = true;
+  }
+}, 1000);
+
+/* Wheel drawing */
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+const segments = ["$20 Amazon Card","Try Again","$50 Amazon Card","Missed Out!","$100 Amazon Card"];
+const colors = ["#FF9900","#C94C4C","#FF9900","#C94C4C","#FF9900"];
+const segCount = segments.length;
+const center = canvas.width/2;
+const radius = canvas.width/2;
+
+function drawWheel() {
+  for(let i=0; i<segCount; i++){
+    let angle = (2*Math.PI / segCount)*i;
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, angle, angle + 2*Math.PI/segCount);
+    ctx.fillStyle = colors[i];
+    ctx.fill();
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(angle + Math.PI/segCount);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "white";
+    ctx.font = "bold 20px Arial";
+    ctx.fillText(segments[i], radius-10, 0);
+    ctx.restore();
+  }
+}
+drawWheel();
+
+/* Spin action */
+const spinBtn = document.getElementById('spinBtn');
+const arrow = document.querySelector('.arrow');
+const claimBtn = document.getElementById('claimBtn');
+
+spinBtn.addEventListener('click', () => {
+  spinBtn.style.display = 'none';
+  let spins = 5; // number of rotations
+  let stopIndex = 4; // $100 Amazon Card
+  let stopAngle = (2*Math.PI/segCount)*stopIndex + (2*Math.PI/segCount)/2;
+  let currentRotation = 0;
+  let targetRotation = spins*2*Math.PI + stopAngle;
+  let duration = 4000;
+  let start = null;
+
+  function animate(time){
+    if(!start) start = time;
+    let progress = (time - start)/duration;
+    if(progress>1) progress=1;
+    let eased = easeOutCubic(progress);
+    let rotation = eased * targetRotation;
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.translate(center, center);
+    ctx.rotate(rotation);
+    ctx.translate(-center, -center);
+    drawWheel();
+    ctx.setTransform(1,0,0,1,0,0);
+    if(progress<1){
+      requestAnimationFrame(animate);
+    } else {
+      claimBtn.style.display = 'block';
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+  }
+  requestAnimationFrame(animate);
+});
+
+/* Ease out cubic */
+function easeOutCubic(t) {
+  return (--t)*t*t +1;
+}
+</script>
+
+</body>
+</html>
