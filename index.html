@@ -16,14 +16,14 @@
     </header>
 
     <main class="visual" role="main">
-      <!-- decorative card (put amazon-card.png in repo root) -->
+      <!-- gift card image (place amazon-card.png in repo root) -->
       <img src="amazon-card.png" alt="Amazon Card" class="gift-card" id="giftCard">
 
       <div class="wheel-wrap" id="wheelWrap">
         <canvas id="wheel" width="500" height="500" aria-hidden="true"></canvas>
 
-        <!-- small arrow pointer at top (visual aid) -->
-        <div class="arrow-pointer" aria-hidden="true"></div>
+        <!-- arrow: small head-tail arrow from center outward -->
+        <div class="center-arrow" aria-hidden="true"></div>
 
         <!-- center spin card -->
         <div class="spin-card" id="spinCard" role="button" aria-label="Spin Now" tabindex="0">
@@ -32,7 +32,8 @@
       </div>
 
       <div class="spacer"></div>
-      <!-- CTA fixed near 84% viewport height -->
+
+      <!-- CTA fixed near bottom (84% viewport height) -->
       <button class="cta" id="ctaBtn" aria-hidden="true">Claim Your Reward</button>
     </main>
   </div>
