@@ -1,88 +1,97 @@
-/* Countdown timer */
-let countdownEl = document.getElementById('countdown');
-let timeLeft = 5 * 60;
-let countdownInterval = setInterval(() => {
-  let minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
-  let seconds = String(timeLeft % 60).padStart(2, '0');
-  countdownEl.textContent = `Event ends in ${minutes}:${seconds}`;
-  timeLeft--;
-  if(timeLeft < 0){
-    clearInterval(countdownInterval);
-    countdownEl.textContent = "This round is closed. Stay tuned for what's next.";
-    document.getElementById('spinBtn').disabled = true;
-  }
-}, 1000);
+const wheel = document.getElementById("wheel");
+const ctx = wheel.getContext("2d");
+const spinBtn = document.getElementById("spinBtn");
+const ctaBtn = document.getElementById("ctaBtn");
 
-/* Wheel drawing */
-const canvas = document.getElementById('wheel');
-const ctx = canvas.getContext('2d');
-const segments = ["$20 Amazon Card","Try Again","$50 Amazon Card","Missed Out!","$100 Amazon Card"];
-const colors = ["#FF9900","#C94C4C","#FF9900","#C94C4C","#FF9900"];
-const segCount = segments.length;
-const center = canvas.width/2;
-const radius = canvas.width/2;
+let segments = [
+    { prize: "$10", name: "AMAZON" },
+    { prize: "Try Again", name: "" },
+    { prize: "$20", name: "AMAZON" },
+    { prize: "Missed it!", name: "" },
+    { prize: "$50", name: "AMAZON" },
+    { prize: "Try Again", name: "" },
+    { prize: "$100", name: "AMAZON" },
+    { prize: "Missed it!", name: "" }
+];
 
-function drawWheel() {
-  for(let i=0; i<segCount; i++){
-    let angle = (2*Math.PI / segCount)*i;
-    ctx.beginPath();
-    ctx.moveTo(center, center);
-    ctx.arc(center, center, radius, angle, angle + 2*Math.PI/segCount);
-    ctx.fillStyle = colors[i];
-    ctx.fill();
-    ctx.save();
-    ctx.translate(center, center);
-    ctx.rotate(angle + Math.PI/segCount);
-    ctx.textAlign = "right";
-    ctx.fillStyle = "white";
-    ctx.font = "bold 20px Arial";
-    ctx.fillText(segments[i], radius-10, 0);
-    ctx.restore();
-  }
+let colors = [
+    "#ff9900", "#1a1a1a", "#ff9900", "#1a1a1a",
+    "#ff9900", "#1a1a1a", "#ff9900", "#1a1a1a"
+];
+
+let startAngle = 0;
+let arc = Math.PI / 4;
+
+function drawWheel(highlightIndex = -1) {
+    for (let i = 0; i < segments.length; i++) {
+        let angle = startAngle + i * arc;
+
+        ctx.beginPath();
+        ctx.fillStyle = colors[i];
+        ctx.moveTo(wheel.width/2, wheel.height/2);
+        ctx.arc(wheel.width/2, wheel.height/2, wheel.width/2, angle, angle + arc);
+        ctx.fill();
+
+        // draw capsule badge
+        ctx.save();
+        ctx.translate(wheel.width/2, wheel.height/2);
+        ctx.rotate(angle + arc/2);
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.strokeStyle = highlightIndex === i ? "#ffcc00" : "rgba(255,255,255,0.2)";
+        ctx.lineWidth = 3;
+        ctx.fillRect(wheel.width/2 - 100, -20, 90, 40);
+        ctx.strokeRect(wheel.width/2 - 100, -20, 90, 40);
+
+        ctx.fillStyle = "white";
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(segments[i].prize, wheel.width/2 - 55, -5);
+        ctx.fillText(segments[i].name, wheel.width/2 - 55, 15);
+        ctx.restore();
+    }
 }
+
 drawWheel();
 
-/* Spin action */
-const spinBtn = document.getElementById('spinBtn');
-const arrow = document.querySelector('.arrow');
-const claimBtn = document.getElementById('claimBtn');
+spinBtn.addEventListener("click", () => {
+    spinBtn.style.display = "none";
 
-spinBtn.addEventListener('click', () => {
-  spinBtn.style.display = 'none';
-  let spins = 5;
-  let stopIndex = 4; // $100 Amazon Card
-  let stopAngle = (2*Math.PI/segCount)*stopIndex + (2*Math.PI/segCount)/2;
-  let targetRotation = spins*2*Math.PI + stopAngle;
-  let duration = 4000;
-  let start = null;
+    let spinTime = 5500;
+    let targetAngle = (Math.PI*6) + (arc * 6.2);
+    let start = null;
 
-  function animate(time){
-    if(!start) start = time;
-    let progress = (time - start)/duration;
-    if(progress>1) progress=1;
-    let eased = easeOutCubic(progress);
-    let rotation = eased * targetRotation;
-    ctx.setTransform(1,0,0,1,0,0);
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.translate(center, center);
-    ctx.rotate(rotation);
-    ctx.translate(-center, -center);
-    drawWheel();
-    ctx.setTransform(1,0,0,1,0,0);
-    if(progress<1){
-      requestAnimationFrame(animate);
-    } else {
-      claimBtn.style.display = 'block';
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
+    function rotate(timestamp) {
+        if(!start) start = timestamp;
+        let progress = timestamp - start;
+
+        let rotation = easeOut(progress, 0, targetAngle, spinTime);
+        startAngle = rotation;
+
+        // highlight random segment during rotation
+        let highlightIndex = Math.floor(Math.random()*segments.length);
+
+        ctx.clearRect(0,0,wheel.width,wheel.height);
+        drawWheel(highlightIndex);
+
+        if(progress < spinTime){
+            requestAnimationFrame(rotate);
+        } else {
+            // stop at $100 segment
+            startAngle = 7*arc;
+            ctx.clearRect(0,0,wheel.width,wheel.height);
+            drawWheel(6); // highlight $100
+            ctaBtn.classList.remove("hidden");
+        }
     }
-  }
-  requestAnimationFrame(animate);
+
+    requestAnimationFrame(rotate);
 });
 
-function easeOutCubic(t) {
-  return (--t)*t*t +1;
+function easeOut(t,b,c,d){
+    t/=d;
+    return -c * t*(t-2) + b;
 }
+
+ctaBtn.addEventListener("click", () => {
+    window.location.href = "https://google.com";
+});
