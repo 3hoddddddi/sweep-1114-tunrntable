@@ -1,16 +1,16 @@
 /* configuration */
 const SEGMENTS = [
-  {title:"$10", subtitle:"AMAZON"},
+  {title:"$10 Amazon Card", subtitle:""},
   {title:"Try Again", subtitle:""},
-  {title:"$20", subtitle:"AMAZON"},
-  {title:"Missed it!", subtitle:""},
-  {title:"$50", subtitle:"AMAZON"},
+  {title:"$20 Amazon Card", subtitle:""},
+  {title:"Missed Out!", subtitle:""},
+  {title:"$50 Amazon Card", subtitle:""},
   {title:"Try Again", subtitle:""},
-  {title:"$100", subtitle:"AMAZON"},
-  {title:"Missed it!", subtitle:""}
+  {title:"$100 Amazon Card", subtitle:""},
+  {title:"Missed Out!", subtitle:""}
 ];
 const COLORS = ["#FF9900","#C94C4C","#FF9900","#C94C4C","#FF9900","#C94C4C","#FF9900","#C94C4C"];
-const TARGET_INDEX = 6; // ensure final lands on $100
+const TARGET_INDEX = 6; // $100 slice
 const CANVAS_LOGICAL = 500;
 
 /* elements */
@@ -50,12 +50,10 @@ function updateCountdown(){
   countdownEl.textContent = (m<10?'0'+m:m) + ':' + (s<10?'0'+s:s);
 }
 function onCountdownEnd(){
-  // show closed message and disable spin
   const header = document.querySelector('.header');
   header.querySelector('.countdown-line').textContent = "This round is closed. Stay tuned for what's next.";
   spinCard.style.pointerEvents = 'none';
   spinCard.style.opacity = '0.6';
-  // hide CTA if visible
   ctaBtn.style.display = 'none';
 }
 
@@ -72,7 +70,7 @@ function fitCanvas(){
 window.addEventListener('resize', ()=>{ fitCanvas(); drawWheel(currentRotation); adjustGiftPosition(); });
 fitCanvas();
 
-/* draw wheel with radial text (text perpendicular to edge, facing outward) */
+/* draw wheel with radial text perpendicular to edge, facing outward */
 function drawWheel(rotation, highlightIndex = -1){
   ctx.clearRect(0,0,CANVAS_LOGICAL,CANVAS_LOGICAL);
   ctx.save();
@@ -94,30 +92,30 @@ function drawWheel(rotation, highlightIndex = -1){
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // radial text: place near outer edge, rotate so text is perpendicular and faces outward
+    // radial text: perpendicular and facing outward
     const midAng = start + arc/2;
-    const textR = radius - 36;
+    const textR = radius - 44;
     const x = Math.cos(midAng) * textR;
     const y = Math.sin(midAng) * textR;
 
     ctx.save();
     ctx.translate(x, y);
 
-    // rotate text so it is perpendicular to radius and facing outward
+    // rotate so text is perpendicular to radius
     let rot = midAng + Math.PI/2;
-    // if on bottom half, flip 180deg so text faces outward
     let deg = midAng * 180 / Math.PI;
     if(deg > 90 && deg < 270){
       rot += Math.PI;
     }
     ctx.rotate(rot);
 
-    // draw title vertically (rotated) but we will draw horizontally after rotation
+    // draw title (bigger)
     ctx.fillStyle = "#fff";
-    ctx.font = "700 16px Montserrat";
+    ctx.font = "800 16px Montserrat";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(SEGMENTS[i].title, 0, -6);
+    ctx.fillText(SEGMENTS[i].title, 0, -8);
+    // draw subtitle smaller if present
     if(SEGMENTS[i].subtitle){
       ctx.font = "600 12px Montserrat";
       ctx.fillText(SEGMENTS[i].subtitle, 0, 12);
@@ -125,9 +123,9 @@ function drawWheel(rotation, highlightIndex = -1){
     ctx.restore();
   }
 
-  // no big white center circle; draw subtle center ring only
-  ctx.beginPath(); ctx.arc(0,0,44,0,Math.PI*2); ctx.fillStyle="rgba(255,255,255,0.06)"; ctx.fill();
-  ctx.beginPath(); ctx.arc(0,0,34,0,Math.PI*2); ctx.fillStyle="rgba(255,255,255,0.03)"; ctx.fill();
+  // subtle center rings only (not solid white)
+  // removed big center white circle
+  ctx.beginPath(); ctx.arc(0,0,36,0,Math.PI*2); ctx.fillStyle="rgba(255,255,255,0.02)"; ctx.fill();
   ctx.restore();
 
   // outer subtle ring
@@ -138,67 +136,62 @@ function drawWheel(rotation, highlightIndex = -1){
 /* initial draw */
 drawWheel(currentRotation);
 
-/* adjust gift card position so it's partially covered by wheel (about 43% covered) */
+/* adjust gift card position so wheel covers part of it (~43%) */
 function adjustGiftPosition(){
   const wrap = wheelWrap.getBoundingClientRect();
   const page = document.querySelector('.page').getBoundingClientRect();
-  // place card so wheel covers around 43% of its width: push card left/up relative to wheel
-  const top = wrap.top - page.top + wrap.height * 0.06;
+  // place card so wheel covers ~43% of card width: position relatively to wheel
+  const top = wrap.top - page.top + wrap.height * 0.12;
   const left = wrap.left - page.left + wrap.width * 0.06;
   giftCard.style.top = top + 'px';
   giftCard.style.left = left + 'px';
-  // scale card a bit larger for visibility
-  giftCard.style.width = Math.min(420, wrap.width * 0.62) + 'px';
+  giftCard.style.width = Math.min(480, wrap.width * 0.64) + 'px';
 }
 window.addEventListener('load', ()=>{ fitCanvas(); drawWheel(currentRotation); adjustGiftPosition(); startCountdown(); });
 setTimeout(()=>{ adjustGiftPosition(); }, 300);
 
-/* spin logic: hide center immediately, animate rotation to target, random highlight during spin */
+/* spin logic */
 spinCard.addEventListener('click', startSpin);
 spinCard.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') startSpin(); });
 
 function startSpin(){
   if(spinning) return;
-  // if countdown ended, ignore
   if(countdownSeconds <= 0) return;
   spinning = true;
-  // hide spin card immediately
   spinCard.style.display = 'none';
 
   const spins = 6 + Math.floor(Math.random()*2);
   const degPer = 360 / total;
-  const finalDeg = spins*360 + (-90 - (TARGET_INDEX * degPer + degPer/2)) + (Math.random()*6 - 3);
+  const targetCenterDeg = TARGET_INDEX * degPer + degPer/2;
+  const finalDeg = spins*360 + (-90 - targetCenterDeg) + (Math.random()*4 - 2);
   const finalRad = finalDeg * Math.PI / 180;
 
   const duration = 4200;
-  const startTime = performance.now();
+  const t0 = performance.now();
   const startRot = currentRotation;
   const change = finalRad - startRot;
 
   function animate(now){
-    const elapsed = now - startTime;
+    const elapsed = now - t0;
     const t = Math.min(1, elapsed / duration);
     const ease = 1 - Math.pow(1 - t, 3);
     currentRotation = startRot + change * ease;
 
-    // random highlight index for sparkle effect during spin
-    const highlight = Math.floor(Math.random()*total);
-    drawWheel(currentRotation, highlight);
+    // sparkle highlight: choose random or accelerate near end
+    drawWheel(currentRotation, Math.floor(Math.random()*total));
 
     if(elapsed < duration){
       requestAnimationFrame(animate);
     } else {
-      // finalize
       currentRotation = finalRad % (Math.PI*2);
       drawWheel(currentRotation, TARGET_INDEX);
-      // show CTA
       setTimeout(()=>{ ctaBtn.style.display = 'block'; ctaBtn.setAttribute('aria-hidden','false'); dropConfetti(18); spinning=false; }, 420);
     }
   }
   requestAnimationFrame(animate);
 }
 
-/* confetti as falling $ */
+/* confetti */
 function dropConfetti(count){
   const container = document.createElement('div');
   container.style.position='fixed'; container.style.left='0'; container.style.top='0';
