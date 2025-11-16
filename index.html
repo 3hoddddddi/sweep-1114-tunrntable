@@ -12,6 +12,7 @@
       <div class="line1">Today is your lucky day!</div>
       <div class="line2">SPIN &amp; WIN</div>
       <div class="line3">$100 Amazon Card</div>
+      <div class="countdown-line">Event ends in <span id="countdown">05:00</span></div>
     </header>
 
     <main class="visual" role="main">
@@ -21,8 +22,8 @@
       <div class="wheel-wrap" id="wheelWrap">
         <canvas id="wheel" width="500" height="500" aria-hidden="true"></canvas>
 
-        <!-- fixed pointer at top (visual aid) -->
-        <div class="pointer" aria-hidden="true"></div>
+        <!-- small arrow pointer at top (visual aid) -->
+        <div class="arrow-pointer" aria-hidden="true"></div>
 
         <!-- center spin card -->
         <div class="spin-card" id="spinCard" role="button" aria-label="Spin Now" tabindex="0">
@@ -31,6 +32,7 @@
       </div>
 
       <div class="spacer"></div>
+      <!-- CTA fixed near 84% viewport height -->
       <button class="cta" id="ctaBtn" aria-hidden="true">Claim Your Reward</button>
     </main>
   </div>
