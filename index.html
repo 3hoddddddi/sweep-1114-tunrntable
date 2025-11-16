@@ -1,32 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="stylesheet" href="style.css" />
-<title>Lucky Wheel</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Amazon Wheel</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-
-  <div class="header-text">
-    <div class="line1">$100 Amazon Card</div>
-    <div class="line2">Today is your lucky day!</div>
-    <div class="line3">Event ends in <span id="countdown">05:00</span></div>
-  </div>
-
-  <div class="wheel-section">
-    <div class="wheel-wrapper">
-      <canvas id="wheel" width="400" height="400"></canvas>
-      <div id="spin-btn" class="spin-btn">⭐ SPIN NOW ⭐</div>
-      <div class="arrow"></div>
+    <div class="header-text">
+        <div class="line1">$100 Amazon Card</div>
+        <div class="line2">Today is your lucky day!</div>
+        <div class="line3">Event ends in <span id="countdown">05:00</span></div>
     </div>
-    <img src="card.png" alt="Amazon Card" class="card" />
-  </div>
 
-  <button id="claim-btn" class="claim-btn">Claim Your Reward</button>
+    <div class="wheel-wrapper">
+        <img src="card.png" class="card-img" alt="Amazon Card">
+        <div class="wheel-container">
+            <canvas id="wheel" width="400" height="400"></canvas>
+            <button id="spin-button">⭐ SPIN NOW ⭐</button>
+            <div class="arrow"></div>
+        </div>
+    </div>
 
+    <button id="cta-button">Claim Your Reward</button>
 </div>
 
 <script src="script.js"></script>
