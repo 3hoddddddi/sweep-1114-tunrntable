@@ -1,31 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Amazon Spin & Win</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Spin & Win - Amazon Card</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="page">
+    <header class="header" role="banner">
+      <div class="line1">Today is your lucky day!</div>
+      <div class="line2">SPIN &amp; WIN</div>
+      <div class="line3">$100 Amazon Card</div>
+    </header>
 
-<div class="container">
+    <main class="visual" role="main">
+      <!-- decorative card (put amazon-card.png in repo root) -->
+      <img src="amazon-card.png" alt="Amazon Card" class="gift-card" id="giftCard">
 
-    <div class="header">
-        <div class="line1">Today is your lucky day!</div>
-        <div class="line2">SPIN & WIN</div>
-        <div class="line3">$100 Amazon Card</div>
-    </div>
+      <div class="wheel-wrap" id="wheelWrap">
+        <canvas id="wheel" width="500" height="500" aria-hidden="true"></canvas>
 
-    <img src="amazon-card.png" class="card-img" alt="Amazon Gift Card" />
+        <!-- fixed pointer at top (visual aid) -->
+        <div class="pointer" aria-hidden="true"></div>
 
-    <div class="wheel-container">
-        <canvas id="wheel" width="500" height="500"></canvas>
-        <div class="spin-btn" id="spinBtn"><span>⭐ SPIN NOW ⭐</span></div>
-    </div>
+        <!-- center spin card -->
+        <div class="spin-card" id="spinCard" role="button" aria-label="Spin Now" tabindex="0">
+          <span id="spinLabel">⭐ SPIN NOW ⭐</span>
+        </div>
+      </div>
 
-    <button class="cta-btn hidden" id="ctaBtn">Claim Your Reward</button>
-
-</div>
+      <div class="spacer"></div>
+      <button class="cta" id="ctaBtn" aria-hidden="true">Claim Your Reward</button>
+    </main>
+  </div>
 
 <script src="script.js"></script>
 </body>
