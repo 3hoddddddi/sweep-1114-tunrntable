@@ -1,32 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lucky Amazon Wheel</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
+<!doctype html> <html lang="en"> <head> <meta charset="utf-8" /> <meta name="viewport" content="width=device-width,initial-scale=1" /> <title>Spin & Win - Amazon Card</title> <link rel="stylesheet" href="style.css" /> </head> <body> <div class="page"> <header class="header" role="banner"> <div class="line1" id="line1">Today is your lucky day!</div> <div class="line2" id="line2">SPIN &amp; WIN</div> <div class="line3" id="line3">\$100 Amazon Card</div> <div class="countdown-line" id="countdownLine">Event ends in <span id="countdown">05:00</span></div> </header>
+<main class="visual" role="main">
+  <img src="amazon-card.png" alt="Amazon Card" class="gift-card" id="giftCard">
 
-<div class="container">
-    <div class="header-text">
-        <div class="line1">$100 Amazon Card</div>
-        <div class="line2">Today is your lucky day!</div>
-        <div class="line3">Event ends in <span id="countdown">05:00</span></div>
+  <div class="wheel-wrap" id="wheelWrap">
+    <canvas id="wheel" width="500" height="500" aria-hidden="true"></canvas>
+
+    <!-- Arrow: tail anchored at center, pointing to 12 o'clock by default -->
+    <div class="center-arrow" id="centerArrow" aria-hidden="true"></div>
+
+    <div class="spin-card" id="spinCard" role="button" aria-label="Spin Now" tabindex="0">
+      <span id="spinLabel">⭐ SPIN NOW ⭐</span>
     </div>
+  </div>
 
-    <div class="wheel-wrapper">
-        <img src="card.png" class="card-img" alt="Amazon Card">
-        <div class="wheel-container">
-            <canvas id="wheel" width="400" height="400"></canvas>
-            <button id="spin-button">⭐ SPIN NOW ⭐</button>
-            <div class="arrow"></div>
-        </div>
-    </div>
+  <div class="spacer"></div>
 
-    <button id="cta-button">Claim Your Reward</button>
-</div>
-
-<script src="script.js"></script>
-</body>
-</html>
+  <button class="cta" id="ctaBtn" aria-hidden="true">Claim Your Reward</button>
+</main>
+</div> <script src="script.js"></script> </body> </html>
