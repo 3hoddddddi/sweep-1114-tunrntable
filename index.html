@@ -1,42 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Spin & Win - Amazon Card</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="stylesheet" href="style.css" />
+<title>Lucky Wheel</title>
 </head>
 <body>
-  <div class="page">
-    <header class="header" role="banner">
-      <div class="line1">Today is your lucky day!</div>
-      <div class="line2">SPIN &amp; WIN</div>
-      <div class="line3">$100 Amazon Card</div>
-      <div class="countdown-line">Event ends in <span id="countdown">05:00</span></div>
-    </header>
 
-    <main class="visual" role="main">
-      <!-- gift card image (place amazon-card.png in repo root) -->
-      <img src="amazon-card.png" alt="Amazon Card" class="gift-card" id="giftCard">
+<div class="container">
 
-      <div class="wheel-wrap" id="wheelWrap">
-        <canvas id="wheel" width="500" height="500" aria-hidden="true"></canvas>
-
-        <!-- arrow: small head-tail arrow from center outward -->
-        <div class="center-arrow" aria-hidden="true"></div>
-
-        <!-- center spin card -->
-        <div class="spin-card" id="spinCard" role="button" aria-label="Spin Now" tabindex="0">
-          <span id="spinLabel">⭐ SPIN NOW ⭐</span>
-        </div>
-      </div>
-
-      <div class="spacer"></div>
-
-      <!-- CTA fixed near bottom (84% viewport height) -->
-      <button class="cta" id="ctaBtn" aria-hidden="true">Claim Your Reward</button>
-    </main>
+  <div class="header-text">
+    <div class="line1">$100 Amazon Card</div>
+    <div class="line2">Today is your lucky day!</div>
+    <div class="line3">Event ends in <span id="countdown">05:00</span></div>
   </div>
+
+  <div class="wheel-section">
+    <div class="wheel-wrapper">
+      <canvas id="wheel" width="400" height="400"></canvas>
+      <div id="spin-btn" class="spin-btn">⭐ SPIN NOW ⭐</div>
+      <div class="arrow"></div>
+    </div>
+    <img src="card.png" alt="Amazon Card" class="card" />
+  </div>
+
+  <button id="claim-btn" class="claim-btn">Claim Your Reward</button>
+
+</div>
 
 <script src="script.js"></script>
 </body>
