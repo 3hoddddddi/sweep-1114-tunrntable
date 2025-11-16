@@ -1,90 +1,144 @@
-const wheel = document.getElementById("wheel");
-const ctx = wheel.getContext("2d");
-const spinBtn = document.getElementById("spin-button");
-const ctaBtn = document.getElementById("cta-button");
-
-const sectors = [
-    "Try Again",
-    "Try Again",
-    "Missed Out!",
-    "Missed Out!",
-    "$10 Amazon Card",
-    "$20 Amazon Card",
-    "$50 Amazon Card",
-    "$100 Amazon Card"
+const SEGMENTS = [
+  {title:"$10 Amazon Card"},
+  {title:"Try Again"},
+  {title:"$20 Amazon Card"},
+  {title:"Missed Out!"},
+  {title:"$50 Amazon Card"},
+  {title:"Try Again"},
+  {title:"$100 Amazon Card"},
+  {title:"Missed Out!"}
 ];
+const COLORS = ["#FF9900","#C94C4C","#FF9900","#C94C4C","#FF9900","#C94C4C","#FF9900","#C94C4C"];
+const TARGET_INDEX = 6; // $100
+const CANVAS_LOGICAL = 500;
 
-const colors = [
-    "#FF9900","#FFB84D","#FF9900","#FFB84D","#FF9900","#FFB84D","#FF9900","#FFB84D"
-];
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+const wheelWrap = document.getElementById('wheelWrap');
+const spinCard = document.getElementById('spinCard');
+const ctaBtn = document.getElementById('ctaBtn');
+const giftCard = document.getElementById('giftCard');
+const countdownEl = document.getElementById('countdown');
+const centerArrow = document.getElementById('centerArrow');
 
-let startAngle = 0;
-const arc = 2 * Math.PI / sectors.length;
-const spinTimeTotal = 3000;
+let total = SEGMENTS.length;
+let arc = (2 * Math.PI) / total;
+let radius = CANVAS_LOGICAL / 2;
 let spinning = false;
 
-function drawWheel() {
-    const radius = wheel.width / 2;
-    ctx.clearRect(0,0,wheel.width,wheel.height);
+let countdownSeconds = 300;
+function startCountdown(){
+  updateCountdown();
+  setInterval(()=>{
+    countdownSeconds--;
+    if(countdownSeconds<=0){ countdownEl.textContent="00:00"; spinCard.style.pointerEvents='none'; } 
+    else updateCountdown();
+  },1000);
+}
+function updateCountdown(){
+  const m = Math.floor(countdownSeconds/60);
+  const s = countdownSeconds%60;
+  countdownEl.textContent=(m<10?'0'+m:m)+':'+(s<10?'0'+s:s);
+}
 
-    for(let i=0;i<sectors.length;i++){
-        const angle = startAngle + i * arc;
-        ctx.fillStyle = colors[i];
-        ctx.beginPath();
-        ctx.moveTo(radius,radius);
-        ctx.arc(radius,radius,radius, angle, angle + arc);
-        ctx.fill();
-        ctx.save();
+function fitCanvas(){
+  const rect = wheelWrap.getBoundingClientRect();
+  const size = Math.min(rect.width, rect.height);
+  canvas.style.width = size+'px';
+  canvas.style.height = size+'px';
+  canvas.width = CANVAS_LOGICAL;
+  canvas.height = CANVAS_LOGICAL;
+  radius = CANVAS_LOGICAL/2;
+}
+window.addEventListener('resize', ()=>{ fitCanvas(); drawWheel(); adjustGiftPosition(); });
+fitCanvas();
 
-        ctx.translate(radius, radius);
-        ctx.rotate(angle + arc/2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 14px Montserrat";
-        ctx.fillText(sectors[i], radius - 10, 0);
-        ctx.restore();
-    }
+function drawWheel(highlightIndex=-1){
+  ctx.clearRect(0,0,CANVAS_LOGICAL,CANVAS_LOGICAL);
+  ctx.save();
+  ctx.translate(radius,radius);
+
+  for(let i=0;i<total;i++){
+    const start = i*arc - Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.arc(0,0,radius-6,start,start+arc,false);
+    ctx.closePath();
+    ctx.fillStyle = COLORS[i];
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.06)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    const midAng = start+arc/2;
+    const textR = radius-40;
+    const x = Math.cos(midAng)*textR;
+    const y = Math.sin(midAng)*textR;
+
+    ctx.save();
+    ctx.translate(x,y);
+    let rot = midAng + Math.PI/2;
+    let norm = midAng;
+    if(norm<0) norm+=Math.PI*2;
+    if(norm>Math.PI/2 && norm<1.5*Math.PI) rot+=Math.PI;
+    ctx.rotate(rot);
+    ctx.fillStyle="#fff";
+    ctx.font="800 16px Montserrat";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(SEGMENTS[i].title,0,-8);
+    ctx.restore();
+  }
+  ctx.restore();
 }
 
 drawWheel();
 
-function spin() {
-    if(spinning) return;
-    spinning = true;
-    let spins = 0;
-    const totalSpins = 60;
-    const targetIndex = sectors.indexOf("$100 Amazon Card");
+function adjustGiftPosition(){
+  const wrap = wheelWrap.getBoundingClientRect();
+  const page = document.querySelector('.page').getBoundingClientRect();
+  const top = wrap.top - page.top - wrap.height*0.12;
+  const left = wrap.left - page.left + wrap.width*0.02;
+  giftCard.style.top=top+'px';
+  giftCard.style.left=left+'px';
+  giftCard.style.width=Math.min(520,wrap.width*0.64)+'px';
+}
+window.addEventListener('load', ()=>{ fitCanvas(); drawWheel(); adjustGiftPosition(); startCountdown(); });
+setTimeout(()=>{ adjustGiftPosition(); },300);
 
-    function animate() {
-        spins++;
-        startAngle += 0.2 + spins*0.002; 
-        drawWheel();
-        if(spins < totalSpins){
-            requestAnimationFrame(animate);
-        } else {
-            const finalAngle = (targetIndex * arc) - arc/2;
-            startAngle = finalAngle;
-            drawWheel();
-            spinBtn.style.display = "none";
-            ctaBtn.style.display = "block";
-            spinning = false;
-        }
+/* arrow spin instead of wheel spin */
+spinCard.addEventListener('click', startSpin);
+spinCard.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' ') startSpin();});
+
+function startSpin(){
+  if(spinning) return;
+  if(countdownSeconds<=0) return;
+  spinning=true;
+  spinCard.style.display='none';
+
+  const degPer = 360/total;
+  const targetCenterDeg = TARGET_INDEX*degPer + degPer/2;
+  const spins = 6 + Math.floor(Math.random()*2);
+  const jitter = (Math.random()*6-3);
+  const finalDeg = spins*360 + targetCenterDeg + jitter;
+  const duration = 4200;
+  const start = performance.now();
+  const startDeg = 0;
+
+  function animate(now){
+    const elapsed = now-start;
+    const t = Math.min(1,elapsed/duration);
+    const ease = 1-Math.pow(1-t,3);
+    const currentDeg = startDeg + (finalDeg-startDeg)*ease;
+    centerArrow.style.transform = `translate(-50%,-50%) rotate(${currentDeg}deg)`;
+    drawWheel(Math.floor(Math.random()*total));
+    if(elapsed<duration) requestAnimationFrame(animate);
+    else{
+      const finalNorm = finalDeg%360;
+      centerArrow.style.transform=`translate(-50%,-50%) rotate(${finalNorm}deg)`;
+      drawWheel(TARGET_INDEX);
+      setTimeout(()=>{ ctaBtn.style.display='block'; spinning=false; },420);
     }
-    animate();
+  }
+  requestAnimationFrame(animate);
 }
-
-spinBtn.addEventListener("click", spin);
-ctaBtn.addEventListener("click", () => window.location.href="https://www.google.com");
-
-function startCountdown(duration){
-    let timer = duration, minutes, seconds;
-    const display = document.getElementById("countdown");
-    setInterval(() => {
-        minutes = parseInt(timer/60,10);
-        seconds = parseInt(timer%60,10);
-        display.textContent = `${minutes<10?'0'+minutes:minutes}:${seconds<10?'0'+seconds:seconds}`;
-        if(--timer<0) timer=0;
-    },1000);
-}
-
-startCountdown(300);
