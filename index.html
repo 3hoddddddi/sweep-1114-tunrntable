@@ -1,16 +1,49 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Amazon Spin & Win</title>
+
+<link rel="stylesheet" href="style.css" />
+
+</head>
+
+<body>
+
+<div class="container">
+
 <div class="header">
-  <h1>Today is your lucky day!</h1>
-  <h2>SPIN & WIN</h2>
-  <h3>$100 Amazon Card</h3>
-  <div class="countdown" id="countdown">Event ends in 05:00</div>
+
+<div class="line1">Today is your lucky day!</div>
+
+<div class="line2">SPIN & WIN</div>
+
+<div class="line3">$100 Amazon Card</div>
+
 </div>
+
+<img src="amazon-card.png" class="card-img" alt="Amazon Gift Card" />
 
 <div class="wheel-container">
-  <canvas id="wheel" width="680" height="680"></canvas>
-  <div class="arrow"></div>
-  <button id="spinBtn">⭐ SPIN NOW ⭐</button>
+
+<canvas id="wheel" width="500" height="500"></canvas>
+
+<div class="spin-btn" id="spinBtn"><span>⭐ SPIN NOW ⭐</span></div>
+
 </div>
 
-<button id="claimBtn" onclick="window.location.href='https://your-affiliate-link.com'">Claim Your Reward</button>
+<button class="cta-btn hidden" id="ctaBtn">Claim Your Reward</button>
 
-<canvas id="confetti-canvas"></canvas>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
